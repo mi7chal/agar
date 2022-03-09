@@ -20,6 +20,10 @@ class Player {
      */
     mass;
 
+    ctxWidth;
+
+    ctxHeight;
+
     /**
      * Przypisuje x i y, losuje rozmiar i kolor
      * @param x wspolrzedna x
@@ -27,7 +31,8 @@ class Player {
      */
     constructor(){
 
-
+        this.ctxWidth=1920;
+        this.ctxHeight=1080;
         this.x = 0;
         this.y = 0;
         this.color = `#${Math.floor(Math.random()*16777215).toString(16)}`;
@@ -80,8 +85,8 @@ class Player {
         return [width/2, height/2, this.size, 0, this.#_rad(2)]
     }
 
-    eat(size){
-        this.mass += size;
+    eat(mass){
+        this.mass += mass/2;
     }
 
     get size(){

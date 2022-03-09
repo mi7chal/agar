@@ -1,3 +1,5 @@
+const player = new Player();
+
 /**
  * Funckja inicjalizujaca dzialanie strony
  */
@@ -15,19 +17,13 @@ function startup(){
 
     const socket = new WebSocket('ws://localhost:8081');
 
-    socket.onmessage = (e, ) => {
+    socket.onmessage = (e) => {
 
         const res = JSON.parse(e.data);
-        pointStore = res.points.map((x)=>new Point(x));
-        console.log(pointStore.length);
+        pointStore = res.points.map((x) => new Point(x));
+        console.log(res);
+        player.mass = res.player.mass;
     }
-
-    setInterval(()=>{
-        socket.send(JSON.stringify(player));
-    }, 100)
-
-
-
 
     addEvent(window, "resize", function(e) {
         ctx.canvas.width  = window.innerWidth;
@@ -39,14 +35,17 @@ function startup(){
         mouseY = e.clientY;
     });
 
-
     setInterval(()=>render(ctx, pointStore, mouseX, mouseY), 10);
 
+    setInterval(()=>{
+        player.ctxWidth = ctx.canvas.width;
+        player.ctxHeight = ctx.canvas.width;
+
+        socket.send(JSON.stringify(player));
+    }, 100);
 
 }
 
-
-const player = new Player();
 
 /**
  * Funckja renderujaca canvas
@@ -60,7 +59,6 @@ function render(ctx, pointStore, mouseX, mouseY){
 
     const width = ctx.canvas.width;
     const height = ctx.canvas.height;
-
     player.move(mouseX, mouseY, width, height);
 
 
@@ -68,12 +66,19 @@ function render(ctx, pointStore, mouseX, mouseY){
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, width, height);
 
+    let wasEeaten = false;
+
     pointStore.forEach((x, i) => {
         if(Math.abs(player.x - x.x) < player.size && Math.abs(player.y - x.y) < player.size){
+
             player.eat(x.mass);
             pointStore.splice(i, 1);
+            wasEeaten = true;
             return;
+
         }
+
+
 
         const ctxX = x.getCtxX(player.x, width);
         const ctxY = x.getCtxY(player.y, height);
